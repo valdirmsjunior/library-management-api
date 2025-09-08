@@ -8,9 +8,9 @@ use App\Http\Resources\AuthorCollection;
 use App\Http\Resources\AuthorResource;
 use App\Models\Author;
 use App\Traits\ApiResponse;
-use Illuminate\Contracts\Cache\Store;
+use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthorController extends Controller
 {
@@ -20,7 +20,7 @@ class AuthorController extends Controller
      */
     public function index(): JsonResponse
     {
-        $authors = Author::with('books')->paginate(10);
+        $authors = Author::with('books')->withCount('books')->paginate(10);
 
         return $this->successResponse(new AuthorCollection($authors), 'Lista de autores', 200);
     }
@@ -30,15 +30,20 @@ class AuthorController extends Controller
      */
     public function store(StoreAuthorRequest $request): JsonResponse
     {
-        $author = Author::create($request->validated());
+        try {
+            $author = Author::create($request->validated());
 
-        return $this->successResponse(new AuthorResource($author), 'Autor criado com sucesso', 201) ;
+            return $this->successResponse(new AuthorResource($author), 'Autor criado com sucesso', 201);
+        } catch (Exception $e) {
+            Log::error('Erro ao criar autor: ' . $e->getMessage());
+            return $this->errorResponse('Erro ao criar autor', 500);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         $author = Author::with('books')->withCount('books')->find($id);
         if (!$author) {
