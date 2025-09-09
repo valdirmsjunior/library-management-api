@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\AuthorController;
+use App\Http\Controllers\Api\MemberController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -11,3 +12,4 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('authors', AuthorController::class);
 Route::apiResource('books', BookController::class);
+Route::apiResource('members', MemberController::class);

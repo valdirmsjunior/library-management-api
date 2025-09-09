@@ -24,7 +24,7 @@ class UpdateBookRequest extends FormRequest
     {
         return [
             'title' => 'sometimes|required|string|max:255',
-            'isbn' => ['sometimes', 'required', 'string'],
+            'isbn' => ['sometimes', 'required', 'string', 'unique:books,isbn,except,id'],
             'description' => 'nullable|string',
             'genre' => 'nullable|string',
             'published_at' => 'nullable|date',
