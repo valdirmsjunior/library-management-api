@@ -11,6 +11,7 @@ use App\Models\Book;
 use App\Traits\ApiResponse;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class BookController extends Controller
@@ -19,9 +20,27 @@ class BookController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $books = Book::with('author')->paginate(10);
+        $query = Book::with('author');
+
+        // Apply search filters, colocar esse trecho no service
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhere('isbn', 'like', "%{$search}%")
+                ->orWhereHas('author', function ($authorQuery) use ($search) {
+                    $authorQuery->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+        //mover posteriormente para service
+        if ($request->has('genre')) {
+            $query->where('genre', $request->input('genre'));
+        }
+
+        $books = $query->paginate(10);
 
         return $this->successResponse(new BookCollection($books), 'Livros listados com sucesso', 200);
     }
