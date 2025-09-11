@@ -32,4 +32,13 @@ trait ApiResponse
             'message' => $message,
         ], $code);
     }
+
+    protected function loginSuccessResponse($data, $message = null, $code = Response::HTTP_OK, $extra = []): JsonResponse
+    {
+        return response()->json(array_merge([
+            'status' => 'success',
+            'message' => $message,
+            'data' => $data,
+        ], $extra), $code);
+    }
 }
